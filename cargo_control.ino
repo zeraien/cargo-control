@@ -1,6 +1,6 @@
 // Cargo Bike Light Controller
 // Copyright 2024 Dimo Fedortchenko
-// Creative Commons CC BY-NC-SA 4.0
+// MIT License
 //
 // Controls lights on your cargo bike with the DB22D08 board
 // from http://www.eletechsup.com 
