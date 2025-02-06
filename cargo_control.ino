@@ -57,9 +57,9 @@ void set_strobe(CHANNEL ch, bool on, int phase = 0) {
   BLINK_PHASE[chtoi(ch)] = phase;
 }
 
-void set_blink(CHANNEL ch, bool on) {
+void set_blink(CHANNEL ch, bool on, int phase = 0) {
   set_mode(ch, on ? MODE_BLINK : MODE_OFF);
-  BLINK_PHASE[chtoi(ch)] = 0;
+  BLINK_PHASE[chtoi(ch)] = phase;
 }
 
 void apply_switches() {
