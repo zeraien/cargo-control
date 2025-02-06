@@ -44,6 +44,7 @@ const int K4 = A0;
 #define SW_RED INPUT5
 #define SW_HORN INPUT6
 #define SW_BLINK_R INPUT7
+#define SW_SWETRACK_RELAY INPUT8
 
 #define SW_ALERT SW_RED
 // #define SW_DRL SW_3
