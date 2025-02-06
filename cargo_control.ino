@@ -25,8 +25,6 @@ float ALERT_TIMER = 0;
 float BLINK_TIMER = 0;
 float STROBE_TIMER = 0;
 bool ACTIVE_BLINK_PHASE = 0;
-bool PREV_STROBE_PHASE = false;
-bool ACTIVE_STROBE_PHASE = false;
 
 // blink and strobe helpers
 uchar BLINK_PHASE[CHANNEL_COUNT];
@@ -155,8 +153,6 @@ void subtract_timers(unsigned long dt) {
       else 
         STROBE_COUNT[i]++;
     }
-    PREV_STROBE_PHASE = ACTIVE_STROBE_PHASE;
-    ACTIVE_STROBE_PHASE = !ACTIVE_STROBE_PHASE;
   }
 }
 
