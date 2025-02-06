@@ -84,8 +84,16 @@ void apply_switches() {
 
 
   // DRL //////////////////////////////////////////////
-  set_power(CHANNEL_LIGHT_L, switch_status.drl && !switch_status.blink_left);
-  set_power(CHANNEL_LIGHT_R, switch_status.drl && !switch_status.blink_right);
+  if (switch_status.four_way)
+  {
+    set_blink(CHANNEL_LIGHT_L, switch_status.drl && !is_blink, 1);
+    set_blink(CHANNEL_LIGHT_R, switch_status.drl && !is_blink, 1);
+  }
+  else
+  {
+    set_power(CHANNEL_LIGHT_L, switch_status.drl && !switch_status.blink_left);
+    set_power(CHANNEL_LIGHT_R, switch_status.drl && !switch_status.blink_right);
+  }
   /////////////////////////////////////////////////////
 
 
