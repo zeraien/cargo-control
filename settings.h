@@ -1,8 +1,6 @@
 #ifndef __SETTINGS_H__
 #define __SETTINGS_H__
 
-#define DEBUG
-
 #include <Arduino.h>
 
 #define uchar unsigned char 
