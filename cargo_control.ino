@@ -287,7 +287,7 @@ void setup() {
   digitalWrite(OE_595, LOW);// Enable 74HC595  
 
 
-  FlexiTimer2::set(2, 1.0/1000, custom_loop); // call every 2ms "ticks"
+  FlexiTimer2::set(50, 1.0/1000, custom_loop); // call every 50ms
   FlexiTimer2::start();
  
   start_up();  
