@@ -19,7 +19,7 @@ s_mode_timer MODE_TIMERS[CHANNEL_COUNT];
 SWITCH_STATUS switch_status = {false, false, false, false, false, false, false, true};
 
 // strobe helpers
-uint STROBE_COUNT[CHANNEL_COUNT];
+uint STROVE_CURRENT_TICK[CHANNEL_COUNT];
 
 float ALERT_TIMER = 0;
 float BLINK_TIMER = 0;
@@ -27,10 +27,36 @@ float STROBE_TIMER = 0;
 bool ACTIVE_BLINK_PHASE = 0;
 
 // blink and strobe helpers
+/*
+Determines the phase of the blinkers and strobes.
+There are currently only two phases, 0 and 1.
+In order for two lights to blink at different times,
+we can set the phase to 0 for one light and 1 for another,
+this will mean that when the light with phase 0 is on, the light
+with phase 1 is off and vice versa. This applies to strobing effects
+slightly differently, mainly in that the strobing effect works with a
+few rapid blinks followed by an equally long pause, using phase we can
+alternate the timing of the strobe phase vs the pause phase.
+*/
 uchar BLINK_PHASE[CHANNEL_COUNT];
 
-bool STROBE_PATTERNS[CHANNEL_COUNT][8];
-uchar strobe_blinks = 4;
+/* This determines the appearance of the strobe effect.
+A conter keeps track of which tick we are currently on.
+A tick is a single step in the strobe pattern.
+A tick can both mean the light is on or off, depending on 
+if the tick counter is odd or even.
+For active ticks of 6, this means the light will switch on 3 times
+and switch off 3 times.
+The total ticks is how long the total strobe cycle is.
+Generally the total cycle is double the number of active ticks.
+During the active phase the lights will switch on and off rapidly,
+and during the inactive phase, the lights will be off.
+
+Using BLINK_PHASE we can then determine if the active phase for a specific
+light is during the first half or second half of the total tick counter.
+*/
+uchar strobe_active_ticks = 6;
+uchar strobe_total_ticks = strobe_active_ticks * 2;
 
 // convert 1-based channel number to 0-based array index
 uchar chtoi(uchar ch) {
@@ -117,12 +143,12 @@ void apply_switches() {
 
   if (ALERT_TIMER > 0) {
     set_strobe(CHANNEL_POS_L, true, 1);
-    set_strobe(CHANNEL_POS_R, true);
+    set_strobe(CHANNEL_POS_R, true, 0);
     if (!is_blink) {
-      set_strobe(CHANNEL_LIGHT_L, true);
-      set_strobe(CHANNEL_LIGHT_R, true, 1);
-      set_strobe(CHANNEL_BLINK_L, true, 1);
-      set_strobe(CHANNEL_BLINK_R, true);
+      set_strobe(CHANNEL_LIGHT_L, true, 1);
+      set_strobe(CHANNEL_LIGHT_R, true);
+      set_strobe(CHANNEL_BLINK_L, true);
+      set_strobe(CHANNEL_BLINK_R, true, 1);
     }
   }
   ///////////////////////////////////////////////////////
@@ -156,10 +182,10 @@ void subtract_timers(unsigned long dt) {
   else {
     STROBE_TIMER = STROBE_SPEED;
     for (int i = 0; i < CHANNEL_COUNT; i++) {
-      if (STROBE_COUNT[i] >= strobe_blinks * 2)
-        STROBE_COUNT[i] = 1;
+      if (STROVE_CURRENT_TICK[i] >= strobe_total_ticks)
+        STROVE_CURRENT_TICK[i] = 1;
       else 
-        STROBE_COUNT[i]++;
+        STROVE_CURRENT_TICK[i]++;
     }
   }
 }
@@ -202,34 +228,14 @@ void blink_mode_for_index(uchar index) {
 }
 
 void strobe_mode_for_index(uchar index) {
-  bool reset = PREV_MODE[index] != MODE_STROBE;
-
-  // includes on and off states
   bool phase = (bool)BLINK_PHASE[index];
+  
+  // only lit when strobe count is even
+  bool odd = (STROVE_CURRENT_TICK[index] % 2) > 0;
 
-//   if (ACTIVE_STROBE_PHASE != PREV_STROBE_PHASE) {
-//     // if (reset)
-//       // STROBE_COUNT[index] = phase==1 ? blinks : 0;
-//     // else 
-//     if (STROBE_COUNT[index] >= blinks * 2)
-//       STROBE_COUNT[index] = 0;
-//     else 
-//       STROBE_COUNT[index]++;
+  bool first_half = STROVE_CURRENT_TICK[index] <= strobe_active_ticks && STROVE_CURRENT_TICK[index] > 0;
 
-
-// #ifdef DEBUG
-//   Serial.print("COUNT: ");
-//   Serial.println(STROBE_COUNT[index]);
-// #endif
-//   }
-
-  bool odd = (STROBE_COUNT[index] % 2) > 0;
-
-
-
-  bool on = ((!odd && phase && STROBE_COUNT[index] <= strobe_blinks) || (!odd && !phase && STROBE_COUNT[index] > strobe_blinks));
-  POWER[index] = on;
-
+  POWER[index] = !odd && ((phase && first_half) || (!phase && !first_half));
 }
 
 
@@ -241,7 +247,7 @@ void setup() {
 
   for (int i = 0; i < CHANNEL_COUNT; i++) {
     POWER[i] = false;
-    STROBE_COUNT[i] = 0;
+    STROVE_CURRENT_TICK[i] = 0;
     MODE[i] = MODE_OFF;
     PREV_MODE[i] = MODE_OFF;
     BLINK_PHASE[i] = 0;
