@@ -241,10 +241,6 @@ void strobe_mode_for_index(uchar index) {
 
 void setup() {
 
-#ifdef DEBUG
-  Serial.begin(115200);
-#endif
-
   for (int i = 0; i < CHANNEL_COUNT; i++) {
     POWER[i] = false;
     STROVE_CURRENT_TICK[i] = 0;
@@ -298,10 +294,11 @@ void setup() {
 
 }
 
-void set_next_mode(CHANNEL channel, e_mode mode, long start_in, long duration)
-{
+// todo
+// void set_next_mode(CHANNEL channel, e_mode mode, long start_in, long duration)
+// {
 
-}
+// }
 
 void start_up() {
   float start = 0.;
@@ -325,6 +322,9 @@ void custom_loop(void) {
   apply_switches();
   mode_apply();
   power_apply();
+
+  // display is currently not used
+  //TODO find a way to switch off the display
   //tube_display_loop();
 }
 
